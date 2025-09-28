@@ -106,6 +106,25 @@ class IngredientList(ft.Column):
             self.update_ingredient_list()  
 
         self.update()
+    
+    def get_total(self):
+        total_fat = 0.0
+        total_carbs = 0.0
+        total_protein = 0.0
+        total_kcal = 0
+        for ingredient in self.ingredients:
+            total_fat += ingredient.fat
+            total_carbs += ingredient.carbs
+            total_protein += ingredient.protein
+            total_kcal += ingredient.kcal
+        return Ingredient(
+            name="Total",
+            fat=total_fat,
+            carbs=total_carbs,
+            protein=total_protein,
+            kcal=total_kcal,
+            on_delete=None,
+        )
 
 
 class SimpleMacrosApp(ft.Column):
@@ -126,9 +145,7 @@ class SimpleMacrosApp(ft.Column):
             icon=ft.Icons.CALCULATE, on_click=self.calculate_click
         )
 
-        self.txt_sum_of_macros = ft.TextField(
-            label="Total", value="0", read_only=True, text_align=ft.TextAlign.JUSTIFY
-        )
+        self.txt_sum_of_macros = self.ingredients_list.get_total().row
 
         self.controls = [
             ft.Row(controls=[row_macros, btn_add]),
@@ -155,15 +172,9 @@ class SimpleMacrosApp(ft.Column):
         self.update()
 
     def calculate_click(self, e):
-        value = 0
-        for ingredient in self.ingredients_list.ingredients:
-            protein = float(ingredient.txt_protein.value)
-            carbs = float(ingredient.txt_carbs.value)
-            fat = float(ingredient.txt_fat.value)
-            kcal = int(ingredient.txt_kcal.value)
-            value += protein + carbs + fat + kcal
-        self.txt_sum_of_macros.value = str(value)
-        self.update()
+        total = self.ingredients_list.get_total()
+        self.txt_sum_of_macros.controls = total.row.controls
+        self.txt_sum_of_macros.update()
 
 
 def main(page: ft.Page):
