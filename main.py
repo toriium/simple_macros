@@ -84,18 +84,27 @@ class IngredientList(ft.Column):
         super().__init__()
         self.ingredients: list[Ingredient] = []
 
+        self.update_ingredient_list()
+        self.controls = [*self.ingredients]
+    
+    def update_ingredient_list(self):
+        if not self.ingredients:
+            fake_ingredient = Ingredient("add more")
+            self.ingredients.append(fake_ingredient)
+        if len(self.ingredients) > 1 and self.ingredients[0].name == "add more":
+            del self.ingredients[0]
+
     def add(self, ingredient: Ingredient):
-        # Adiciona o callback de deleção ao ingrediente
         ingredient.on_delete = self.remove
         self.ingredients.append(ingredient)
-        self.controls.append(ingredient)
-        self.update()
+        self.update_ingredient_list()  
+        self.controls = [*self.ingredients]
 
     def remove(self, ingredient: "Ingredient"):
         if ingredient in self.ingredients:
             self.ingredients.remove(ingredient)
-        if ingredient in self.controls:
-            self.controls.remove(ingredient)
+            self.update_ingredient_list()  
+
         self.update()
 
 
@@ -104,7 +113,7 @@ class SimpleMacrosApp(ft.Column):
     def __init__(self):
         super().__init__()
 
-        self.ingredients = IngredientList()
+        self.ingredients_list = IngredientList()
 
         self.form_ingredient = Ingredient(
             name="Put a name", fat=0, carbs=0, protein=0, kcal=0
@@ -118,7 +127,7 @@ class SimpleMacrosApp(ft.Column):
         )
 
         self.txt_sum_of_macros = ft.TextField(
-            label="Total", value="0", text_align=ft.TextAlign.JUSTIFY
+            label="Total", value="0", read_only=True, text_align=ft.TextAlign.JUSTIFY
         )
 
         self.controls = [
@@ -127,7 +136,7 @@ class SimpleMacrosApp(ft.Column):
             ft.Column(
                 spacing=25,
                 controls=[
-                    self.ingredients,
+                    self.ingredients_list,
                 ],
             ),
             self.txt_sum_of_macros,
@@ -140,14 +149,14 @@ class SimpleMacrosApp(ft.Column):
             carbs=self.form_ingredient.carbs,
             protein=self.form_ingredient.protein,
             kcal=self.form_ingredient.kcal,
-            on_delete=self.ingredients.remove,
+            on_delete=self.ingredients_list.remove,
         )
-        self.ingredients.add(ingredient)
+        self.ingredients_list.add(ingredient)
         self.update()
 
     def calculate_click(self, e):
         value = 0
-        for ingredient in self.ingredients.controls:
+        for ingredient in self.ingredients_list.ingredients:
             protein = float(ingredient.txt_protein.value)
             carbs = float(ingredient.txt_carbs.value)
             fat = float(ingredient.txt_fat.value)
