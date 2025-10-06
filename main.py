@@ -179,13 +179,28 @@ class SimpleMacrosApp(ft.Column):
 
 def main(page: ft.Page):
     page.title = "Simple Macros"
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.padding = 20
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
+
+    def change_theme(e):
+        page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        page.update()
+
+    
+    theme_icon_btn = ft.IconButton(
+        icon=ft.Icons.DARK_MODE,
+        on_click=change_theme,  
+        tooltip="Toggle light/dark theme",
+    )
+    
+    page.add(theme_icon_btn)
 
     page.update()
 
-    app = SimpleMacrosApp()
+    # app = SimpleMacrosApp()
 
-    page.add(app)
+    # page.add(app)
 
 
 ft.app(target=main)
