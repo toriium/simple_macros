@@ -106,7 +106,7 @@ def select_all_obj(obj_table, where_clauses: list = None) -> list:
 
     with create_reading_session() as session:
         stmt = select(obj_table).where(*where_clauses)
-        result = session.execute(statement=stmt)
+        result = session.scalars(statement=stmt)
         result = result.all()
 
     return result if result else []

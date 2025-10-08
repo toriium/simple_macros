@@ -1,7 +1,7 @@
 import flet as ft
 
-from data.db_orm.populate_db import populate_db
-from data.db_orm.run_migration import run_migration
+from src.data.db_orm.populate_db import populate_db
+from src.data.db_orm.run_migration import run_migration
 from src.base_layout import BaseLayout
 
 
