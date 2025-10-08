@@ -6,9 +6,11 @@ authors = [
     {name = "toriium",email = "John.Doe@hotmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
-    "flet (>=0.28.3,<0.29.0)"
+    "flet (>=0.28.3,<0.29.0)",
+    "alembic (>=1.16.5,<2.0.0)",
+    "sqlalchemy (>=2.0.43,<3.0.0)"
 ]
 
 
