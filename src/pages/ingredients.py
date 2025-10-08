@@ -9,25 +9,35 @@ class IngredientsPage(ft.Column):
     def __init__(self):
         super().__init__()
         self.expand = True
+        self.columns = []
 
-        ingredients = IngredientsRepository().get_all_ingredients()
-        table = TableBuilder(table=TblIngredients, data_list=ingredients)
+        columns = [ft.DataColumn(ft.Text(col)) for col in TblIngredients().columns()]
+        columns.append(ft.DataColumn(ft.Text("Actions")))
 
-        columns = [ft.DataColumn(ft.Text(col)) for col in table.columns]
-
-        self.data_table = ft.DataTable(
-            columns=columns,
-            rows=[])
+        self.data_table = ft.DataTable(columns=columns, rows=[])
+        self.update_table()
         
-        for ingredient in table.data_table:
-            self.data_table.rows.append(
-                ft.DataRow(cells=[ft.DataCell(ft.Text(str(item))) for item in ingredient])
-            )
-
         text = ft.Text("Ingredients Page", size=30)
         self.controls = [text, self.data_table]
 
+    def update_table(self):
+        ingredients = IngredientsRepository().get_all_ingredients()
+        table = TableBuilder(table=TblIngredients, data_list=ingredients)
 
-    # def did_mount(self):
-    #     # Called after the control is added to the page
-    #     print("BaseLayout mounted")
+        self.data_table.rows.clear()
+        
+        for ingredient in table.data_table:
+            delete_btn = ft.IconButton(
+                icon=ft.Icons.DELETE,
+                tooltip="Delete",
+                on_click=lambda e, ing=ingredient: self.delete_ingredient(ing)
+            )
+            row_cells = [ft.DataCell(ft.Text(str(item))) for item in ingredient]
+            row_cells.append(ft.DataCell(delete_btn))
+            self.data_table.rows.append(ft.DataRow(cells=row_cells))
+
+    def delete_ingredient(self, ingredient: TblIngredients):
+        # IngredientsRepository().delete_ingredient(ingredient.id)
+        IngredientsRepository().delete_ingredient(ingredient[0])
+        self.update_table()
+        self.update()

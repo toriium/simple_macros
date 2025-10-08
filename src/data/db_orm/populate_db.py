@@ -12,9 +12,19 @@ def add_tbl_ingredients() -> list:
         protein=31.0, 
         fiber=0.0, 
         kcal=165.0)
+    
+    ingredient2 = TblIngredients(
+        name="Sausage", 
+        quantity=100.0, 
+        fat=55.6, 
+        carbohydrates=0.0, 
+        protein=31.0, 
+        fiber=0.0, 
+        kcal=8454.0)
 
     commands = [
         ingredient1,
+        ingredient2
     ]
     return commands
 
