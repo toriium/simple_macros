@@ -4,16 +4,19 @@ from src.data.db_orm.tables.tbl_ingredients import TblIngredients
 from src.data.repository.ingredients import IngredientsRepository
 
 class AddEditIngredientsPage(ft.Column):
-    def __init__(self):
+    def __init__(self, navigate_callback=None):
         super().__init__()
+        self.navigate_callback = navigate_callback
 
-        add_row = AddIngredientsRow()
+        add_row = AddIngredientsRow(navigate_callback=self.navigate_callback)
         self.controls = [add_row]
 
 
 class AddIngredientsRow(ft.Row):
-    def __init__(self):
+    def __init__(self, navigate_callback=None):
         super().__init__()
+        self.navigate_callback = navigate_callback
+
         # self.expand = True
 
         self.name = ft.TextField(label="Name", value="", text_align=ft.TextAlign.LEFT,width=100, dense=True)
@@ -57,3 +60,7 @@ class AddIngredientsRow(ft.Row):
         self.protein.value = "0"
         self.kcal.value = "0"
         self.update()
+
+        # Return to IngredientsPage
+        if self.navigate_callback:
+            self.navigate_callback(2)

@@ -36,7 +36,12 @@ class BaseLayout(ft.Column):
 
         self.controls = [layout]
 
-    # Troca o conteúdo dinamicamente
+    def navigate_to(self, index: int):
+        self.sidebar.selected_index = index
+        self.content.content = self.get_page(index)
+        self.update()
+
+
     def on_nav_change(self, e):
         index = e.control.selected_index
         self.content.content = self.get_page(index)
@@ -48,9 +53,9 @@ class BaseLayout(ft.Column):
         elif index == 1:
             return InputPage()
         elif index == 2:
-            return IngredientsPage()
+            return IngredientsPage(navigate_callback=self.navigate_to)
         elif index == 3:
-            return AddEditIngredientsPage()  
+            return AddEditIngredientsPage(navigate_callback=self.navigate_to)  
         else:
             return ft.Text("Page not found")
 
