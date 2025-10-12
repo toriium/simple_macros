@@ -13,7 +13,8 @@ class IngredientsTable(ft.Column):
         self.columns = []
 
         columns = [ft.DataColumn(ft.Text(col)) for col in TblIngredients().columns()]
-        columns.append(ft.DataColumn(ft.Text("Actions")))
+        columns.append(ft.DataColumn(ft.Text("DELETE")))
+        columns.append(ft.DataColumn(ft.Text("EDIT")))
 
         self.data_table = ft.DataTable(columns=columns, rows=[])
         # self.update_table()
@@ -25,7 +26,7 @@ class IngredientsTable(ft.Column):
         self.update_table()
 
     def update_table(self):
-        ingredients = IngredientsRepository().get_all_ingredients()
+        ingredients = IngredientsRepository.get_all_ingredients()
         table = TableBuilder(table=TblIngredients, data_list=ingredients)
 
         self.data_table.rows.clear()
@@ -36,25 +37,36 @@ class IngredientsTable(ft.Column):
                 tooltip="Delete",
                 on_click=lambda e, ing=ingredient: self.delete_ingredient(ing)
             )
+            edit_btn = ft.IconButton(
+                icon=ft.Icons.EDIT,
+                tooltip="Edit",
+                on_click=lambda e, ing=ingredient: self.edit_ingredient(ing)
+            )
             row_cells = [ft.DataCell(ft.Text(str(item))) for item in ingredient]
             row_cells.append(ft.DataCell(delete_btn))
+            row_cells.append(ft.DataCell(edit_btn))
             self.data_table.rows.append(ft.DataRow(cells=row_cells))
         
         self.update()
 
 
     def delete_ingredient(self, ingredient: TblIngredients):
-        # IngredientsRepository().delete_ingredient(ingredient.id)
-        IngredientsRepository().delete_ingredient(ingredient[0])
+        # IngredientsRepository.delete_ingredient(ingredient.id)
+        IngredientsRepository.delete_ingredient(ingredient[0])
         self.update_table()
 
 
+    def edit_ingredient(self, ingredient: TblIngredients):
+        page = StateManager.pages().ADD_EDIT
+        StateManager.change_page(page, mode="edit", ingredient_id=ingredient[0])
+
+        # StateManager.change_page(edit_page)
+
 
 class AddIngredientsRow(ft.Row):
-    def __init__(self, change_page_callback=None):
+    def __init__(self):
         super().__init__()
         self.expand = True
-        self.change_page_callback = change_page_callback
         
         add_btn = ft.ElevatedButton("Add Ingredient", on_click=self.go_to_add_edit)
 
@@ -66,11 +78,11 @@ class AddIngredientsRow(ft.Row):
         # self.change_page_callback(page=add_edit_page)
 
 class IngredientsPage(ft.Column):
-    def __init__(self, change_page_callback=None):
+    def __init__(self):
         super().__init__()
         self.expand = True
         
         self.ingredients_table = IngredientsTable()
-        self.add_ingredients_row = AddIngredientsRow(change_page_callback=change_page_callback)
+        self.add_ingredients_row = AddIngredientsRow()
 
         self.controls = [self.add_ingredients_row, self.ingredients_table]

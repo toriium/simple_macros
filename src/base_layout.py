@@ -54,9 +54,9 @@ class BaseLayout(ft.Column):
         elif index == 1:
             return InputPage()
         elif index == 2:
-            return IngredientsPage(change_page_callback=self.change_page)
+            return IngredientsPage()
         elif index == 3:
-            return AddEditIngredientsPage(change_page_callback=self.change_page)  
+            return AddEditIngredientsPage(mode="add")  
         else:
             return ft.Text("Page not found")
 
