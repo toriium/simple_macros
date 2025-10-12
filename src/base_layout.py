@@ -4,6 +4,7 @@ from pages.add_edit_ingredient import AddEditIngredientsPage
 from src.pages.ingredients import IngredientsPage
 from src.pages.home import HelloPage
 from src.pages.input_text import InputPage
+from src.state_manager import StateManager
 
 
 class BaseLayout(ft.Column):
@@ -23,7 +24,7 @@ class BaseLayout(ft.Column):
             on_change=self.on_nav_change,
         )
 
-        self.content = ft.Container(content=self.get_page(0), expand=True, padding=20)
+        self.content = ft.Container(content=self.get_page_default(0), expand=True, padding=20)
 
         layout = ft.Row(
             [
@@ -34,28 +35,28 @@ class BaseLayout(ft.Column):
             expand=True,
         )
 
+        StateManager.base_layout = self
         self.controls = [layout]
 
-    def navigate_to(self, index: int):
-        self.sidebar.selected_index = index
-        self.content.content = self.get_page(index)
+    def change_page(self, page: any):
+        self.sidebar.selected_index = 0 # Update it in the future
+        self.content.content = page
         self.update()
-
 
     def on_nav_change(self, e):
         index = e.control.selected_index
-        self.content.content = self.get_page(index)
+        self.content.content = self.get_page_default(index)
         self.update()
 
-    def get_page(self, index: int):
+    def get_page_default(self, index: int):
         if index == 0:
             return HelloPage()
         elif index == 1:
             return InputPage()
         elif index == 2:
-            return IngredientsPage(navigate_callback=self.navigate_to)
+            return IngredientsPage(change_page_callback=self.change_page)
         elif index == 3:
-            return AddEditIngredientsPage(navigate_callback=self.navigate_to)  
+            return AddEditIngredientsPage(change_page_callback=self.change_page)  
         else:
             return ft.Text("Page not found")
 

@@ -3,6 +3,7 @@ import flet as ft
 from src.data.db_orm.tables.tbl_ingredients import TblIngredients
 from src.data.repository.ingredients import IngredientsRepository
 from src.utils.table_builder import TableBuilder
+from src.state_manager import StateManager
 
 
 class IngredientsTable(ft.Column):
@@ -50,25 +51,26 @@ class IngredientsTable(ft.Column):
 
 
 class AddIngredientsRow(ft.Row):
-    def __init__(self, navigate_callback=None):
+    def __init__(self, change_page_callback=None):
         super().__init__()
         self.expand = True
-        self.navigate_callback = navigate_callback
+        self.change_page_callback = change_page_callback
         
         add_btn = ft.ElevatedButton("Add Ingredient", on_click=self.go_to_add_edit)
 
         self.controls = [add_btn]
     
     def go_to_add_edit(self, e):
-        if self.navigate_callback:
-            self.navigate_callback(3)
+        # add_edit_page = AddEditIngredientsPage(change_page_callback=self.change_page_callback)
+        StateManager.change_page(StateManager.pages().ADD_EDIT)
+        # self.change_page_callback(page=add_edit_page)
 
 class IngredientsPage(ft.Column):
-    def __init__(self, navigate_callback=None):
+    def __init__(self, change_page_callback=None):
         super().__init__()
         self.expand = True
         
         self.ingredients_table = IngredientsTable()
-        self.add_ingredients_row = AddIngredientsRow(navigate_callback=navigate_callback)
+        self.add_ingredients_row = AddIngredientsRow(change_page_callback=change_page_callback)
 
         self.controls = [self.add_ingredients_row, self.ingredients_table]

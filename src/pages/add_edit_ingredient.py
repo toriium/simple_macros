@@ -2,20 +2,21 @@ import flet as ft
 
 from src.data.db_orm.tables.tbl_ingredients import TblIngredients
 from src.data.repository.ingredients import IngredientsRepository
+from src.state_manager import StateManager
 
 class AddEditIngredientsPage(ft.Column):
-    def __init__(self, navigate_callback=None):
+    def __init__(self, change_page_callback=None):
         super().__init__()
-        self.navigate_callback = navigate_callback
+        self.change_page_callback = change_page_callback
 
-        add_row = AddIngredientsRow(navigate_callback=self.navigate_callback)
+        add_row = AddIngredientsRow(change_page_callback=self.change_page_callback)
         self.controls = [add_row]
 
 
 class AddIngredientsRow(ft.Row):
-    def __init__(self, navigate_callback=None):
+    def __init__(self, change_page_callback=None):
         super().__init__()
-        self.navigate_callback = navigate_callback
+        self.change_page_callback = change_page_callback
 
         # self.expand = True
 
@@ -62,5 +63,6 @@ class AddIngredientsRow(ft.Row):
         self.update()
 
         # Return to IngredientsPage
-        if self.navigate_callback:
-            self.navigate_callback(2)
+        # ingredients_page = IngredientsPage()
+        StateManager.change_page(StateManager.pages().INGREDIENTS)
+        # self.change_page_callback(ingredients_page)
