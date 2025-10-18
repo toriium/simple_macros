@@ -11,6 +11,8 @@ class CustomSearchBar(ft.SearchBar, ABC):
         self.on_change = self.handle_change
         self.on_tap = self.open_anchor
 
+        self.selected_data = None
+
         self.lv = ft.ListView()
         self.controls = [self.lv]
     
@@ -22,9 +24,9 @@ class CustomSearchBar(ft.SearchBar, ABC):
         items_to_show = self.items_to_show(e.data.lower())
       
         self.lv.controls.clear()
-        for i in items_to_show:
+        for title, data in items_to_show:
             list_tile = ft.ListTile(
-                title=ft.Text(f"{i}"), on_click=self.close_anchor, data=i
+                title=ft.Text(f"{title}"), on_click=self.close_anchor, data=data
             )
             self.lv.controls.append(list_tile)
         self.update()
@@ -33,4 +35,5 @@ class CustomSearchBar(ft.SearchBar, ABC):
         self.open_view()
 
     def close_anchor(self, e: ft.ControlEvent):
-        self.close_view(e.control.data)
+        self.selected_data = e.control.data
+        self.close_view(e.control.title.value)
