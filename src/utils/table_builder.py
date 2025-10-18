@@ -13,5 +13,6 @@ class TableBuilder:
         data_table: list[list] = []
         for data in self.data_list:
             row = [getattr(data, key) for key in self.columns]
-            data_table.append(row)
+            tuple_data = (data, row)
+            data_table.append(tuple_data)
         self.data_table = data_table

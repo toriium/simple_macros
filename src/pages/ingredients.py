@@ -31,7 +31,7 @@ class IngredientsTable(ft.Column):
 
         self.data_table.rows.clear()
         
-        for ingredient in table.data_table:
+        for ingredient, fields in table.data_table:
             delete_btn = ft.IconButton(
                 icon=ft.Icons.DELETE,
                 tooltip="Delete",
@@ -42,7 +42,7 @@ class IngredientsTable(ft.Column):
                 tooltip="Edit",
                 on_click=lambda e, ing=ingredient: self.edit_ingredient(ing)
             )
-            row_cells = [ft.DataCell(ft.Text(str(item))) for item in ingredient]
+            row_cells = [ft.DataCell(ft.Text(str(item))) for item in fields]
             row_cells.append(ft.DataCell(delete_btn))
             row_cells.append(ft.DataCell(edit_btn))
             self.data_table.rows.append(ft.DataRow(cells=row_cells))
@@ -51,17 +51,12 @@ class IngredientsTable(ft.Column):
 
 
     def delete_ingredient(self, ingredient: TblIngredients):
-        # IngredientsRepository.delete_ingredient(ingredient.id)
-        IngredientsRepository.delete_ingredient(ingredient[0])
+        IngredientsRepository.delete_ingredient(ingredient_id=ingredient.id)
         self.update_table()
-
 
     def edit_ingredient(self, ingredient: TblIngredients):
         page = StateManager.pages().ADD_EDIT
-        StateManager.change_page(page, mode="edit", ingredient_id=ingredient[0])
-
-        # StateManager.change_page(edit_page)
-
+        StateManager.change_page(page, mode="edit", ingredient_id=ingredient.id)
 
 class AddIngredientsRow(ft.Row):
     def __init__(self):

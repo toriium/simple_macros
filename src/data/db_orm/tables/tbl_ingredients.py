@@ -1,6 +1,6 @@
 from sqlalchemy import String
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.data.db_orm.tables.base import Base
 
@@ -18,6 +18,8 @@ class TblIngredients(Base):
     kcal: Mapped[float] = mapped_column(default=0.0, nullable=False)
     # unit: Mapped[str] = mapped_column(String(50), nullable=False)
 
+    # relação reversa
+    recipes: Mapped[list["TblRecipeIngredients"]] = relationship(back_populates="ingredient")
     def __repr__(self):
         return str(self.model_to_dict())
 

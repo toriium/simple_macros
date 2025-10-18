@@ -1,6 +1,9 @@
 from typing import Literal
 import flet as ft
 
+from src.data.db_orm.query_obj import create_writing_session
+from src.data.db_orm.tables.tbl_recipe_ingredients import TblRecipeIngredients
+from src.data.db_orm.tables.tbl_recipes import TblRecipes
 from src.data.db_orm.tables.tbl_ingredients import TblIngredients
 from src.data.repository.ingredients import IngredientsRepository
 from src.state_manager import StateManager
@@ -12,13 +15,15 @@ class AddEditRecipePage(ft.Column):
     def __init__(self, mode: Literal["add", "edit"]="add", recipe_id:int=None):
         super().__init__()
         self.mode = mode
-        self.ingredient_id = recipe_id
+        self.recipe_id = recipe_id
 
-        self.search_bar = IngredientsSearchBar()
-        self.controls = [self.search_bar]
+        self.ingredients_table = IngredientsTable()
+        self.search_bar = IngredientsSearchBar(click_callback_func=self.ingredients_table.add_ingredient)
 
-        add_row = AddIngredientsRow(mode=mode, ingredient_id=recipe_id)
-        self.controls = [add_row]
+        self.recipe_info = RecipeInfoRow(mode=mode)
+        self.add_row = AddUpdateRecipeRow(recipe_info=self.recipe_info, ingredients_table=self.ingredients_table, mode=mode, recipe_id=recipe_id)
+
+        self.controls = [self.search_bar, self.recipe_info, self.add_row, self.ingredients_table]
 
 class IngredientsSearchBar(CustomSearchBar):
     def __init__(self, click_callback_func:callable):
@@ -34,14 +39,15 @@ class IngredientsSearchBar(CustomSearchBar):
             bar_data = SearchBarData(
                 title=ingredient.name,
                 subtitle="subtitle: " + ingredient.name,
-                data=ingredient.name,
+                data=ingredient,
                 img_path=None,
             )
             bar_items.append(bar_data)
         return bar_items
     
     def click_callback(self):
-        self.click_callback_func(self.selected_data)
+        data: TblIngredients = self.selected_data.data
+        self.click_callback_func(data)
 
 
 class IngredientsTable(ft.Column):
@@ -50,61 +56,95 @@ class IngredientsTable(ft.Column):
         self.expand = True
         self.columns = []
 
+        self.used_ingredients: list[TblIngredients] = []
+
         columns = [ft.DataColumn(ft.Text(col)) for col in TblIngredients().columns()]
         columns.append(ft.DataColumn(ft.Text("DELETE")))
-        columns.append(ft.DataColumn(ft.Text("EDIT")))
 
         self.data_table = ft.DataTable(columns=columns, rows=[])
-        # self.update_table()
         
-        text = ft.Text("Ingredients Page", size=30)
+        text = ft.Text("Ingredients", size=30)
         self.controls = [text, self.data_table]
     
     def did_mount(self):
         self.update_table()
 
     def update_table(self):
-        ingredients = IngredientsRepository.get_all_ingredients()
-        table = TableBuilder(table=TblIngredients, data_list=ingredients)
+        table = TableBuilder(table=TblIngredients, data_list=self.used_ingredients)
 
         self.data_table.rows.clear()
-        
-        for ingredient in table.data_table:
+        for ingredient, fields in table.data_table:
             delete_btn = ft.IconButton(
                 icon=ft.Icons.DELETE,
                 tooltip="Delete",
                 on_click=lambda e, ing=ingredient: self.delete_ingredient(ing)
             )
-            edit_btn = ft.IconButton(
-                icon=ft.Icons.EDIT,
-                tooltip="Edit",
-                on_click=lambda e, ing=ingredient: self.edit_ingredient(ing)
-            )
-            row_cells = [ft.DataCell(ft.Text(str(item))) for item in ingredient]
+            
+            row_cells = [ft.DataCell(ft.Text(str(item))) for item in fields]
             row_cells.append(ft.DataCell(delete_btn))
-            row_cells.append(ft.DataCell(edit_btn))
             self.data_table.rows.append(ft.DataRow(cells=row_cells))
         
         self.update()
-
-
-    def delete_ingredient(self, ingredient: TblIngredients):
-        # IngredientsRepository.delete_ingredient(ingredient.id)
-        IngredientsRepository.delete_ingredient(ingredient[0])
+    
+    def add_ingredient(self, ingredient: TblIngredients):
+        self.used_ingredients.append(ingredient)
         self.update_table()
 
 
-    def edit_ingredient(self, ingredient: TblIngredients):
-        page = StateManager.pages().ADD_EDIT
-        StateManager.change_page(page, mode="edit", ingredient_id=ingredient[0])
-    
-class AddIngredientsRow(ft.Row):
-    def __init__(self, mode: Literal["add", "edit"] = "add", recipe_id:int=None):
+    def delete_ingredient(self, ingredient: TblIngredients):
+        """
+        Just remove from the list not DB 
+        """
+        self.used_ingredients.remove(ingredient)
+        self.update_table()
+
+
+
+
+class RecipeInfoRow(ft.Row):
+    def __init__(self, mode: Literal["add", "edit"] = "add", recipe: TblRecipes=None):
+        super().__init__()
+        # self.expand = True
+
+        self.mode = mode
+        self.recipe = recipe
+
+        self.name = ft.TextField(label="Name", value="", text_align=ft.TextAlign.LEFT,width=100, dense=True)
+        # self.quantity = ft.TextField(label="Quantity", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+        
+        # self.fat = ft.TextField(label="Fat", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+        # self.carbs = ft.TextField(label="Carbs", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+        # self.fiber = ft.TextField(label="Fiber", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+        # self.protein = ft.TextField(label="Protein", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+        # self.kcal = ft.TextField(label="Kcal", value=0, text_align=ft.TextAlign.LEFT, width=100, dense=True)
+
+        if self.mode == "edit":
+            self.name.value = self.recipe.name
+            # self.quantity.value = ingredient.quantity
+            # self.fat.value = ingredient.fat
+            # self.carbs.value = ingredient.carbohydrates
+            # self.fiber.value = ingredient.fiber
+            # self.protein.value = ingredient.protein
+            # self.kcal.value = ingredient.kcal
+
+        self.controls = [
+            self.name,
+            # self.quantity,
+            # self.fat,
+            # self.carbs,
+            # self.fiber,
+            # self.protein,
+            # self.kcal,
+        ]
+
+class AddUpdateRecipeRow(ft.Row):
+    def __init__(self,recipe_info: RecipeInfoRow, ingredients_table: IngredientsTable, mode: Literal["add", "edit"] = "add", recipe_id:int=None):
         super().__init__()
 
         self.mode = mode
         self.recipe_id = recipe_id
-        self.recipe_obj = None
+        self.recipe_info = recipe_info
+        self.ingredients_table = ingredients_table
 
 
         text_btn = "Add Recipe" if mode == "add" else "Update Recipe"
@@ -117,29 +157,14 @@ class AddIngredientsRow(ft.Row):
         ]
     
     def add_recipe(self, e):
-        values = {
-            "name": self.name.value,
-            "quantity": float(self.quantity.value),
-            "fat": float(self.fat.value),
-            "carbohydrates": float(self.carbs.value),
-            "fiber": float(self.fiber.value),
-            "protein": float(self.protein.value),
-            "kcal": float(self.kcal.value)
-        }
+        recipe = TblRecipes(name=self.recipe_info.name.value)
 
-        if self.mode == "add":
-            ingredient_obj = TblIngredients(**values)
-            IngredientsRepository.add_ingredient(ingredient_obj)
-        elif self.mode == "edit":
-        #     ingredient_obj = TblIngredients(
-        #         id=self.ingredient_id,
-        #         **values
-        #     )
-            IngredientsRepository.update_ingredient(values=values, ingredient_id=self.ingredient_id)
-
-        self.update()
-
-        # Return to IngredientsPage
-        # ingredients_page = IngredientsPage()
-        StateManager.change_page(StateManager.pages().INGREDIENTS)
-        # self.change_page_callback(ingredients_page)
+        recipe_ingredients: list[TblRecipeIngredients] = []
+        for ingredient in self.ingredients_table.used_ingredients:
+            recipe_ingredient = TblRecipeIngredients(recipe=recipe, ingredient=ingredient, quantity=200, unit="g")
+            recipe_ingredients.append(recipe_ingredient)
+        
+        with create_writing_session() as session:
+            session.add(recipe)
+            session.add_all(recipe_ingredients)
+            session.commit()
