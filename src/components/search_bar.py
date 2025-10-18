@@ -29,6 +29,9 @@ class CustomSearchBar(ft.SearchBar, ABC):
     @abstractmethod
     def search_bar_items(self, typed_text: str) -> list[SearchBarData]: ...
 
+    @abstractmethod
+    def click_callback(self): ...
+
     def handle_change(self, e: ft.ControlEvent):
         search_bar_items = self.search_bar_items(e.data.lower())
 
@@ -51,4 +54,5 @@ class CustomSearchBar(ft.SearchBar, ABC):
 
     def close_anchor(self, e: ft.ControlEvent):
         self.selected_data = e.control.data
+        self.click_callback()
         self.close_view(e.control.title.value)

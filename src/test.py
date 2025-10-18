@@ -26,7 +26,7 @@ class Fruit:
 
 class FruitsSearchBar(CustomSearchBar):
     def search_bar_items(self, typed_text: str) -> list[SearchBarData]:
-        list_to_show: SearchBarData = []
+        bar_items: SearchBarData = []
 
         for i, fruit in enumerate(fruits_list):
             data = Fruit(id=i, name=fruit)
@@ -36,8 +36,8 @@ class FruitsSearchBar(CustomSearchBar):
                 data=data,
                 img_path=None,
             )
-            list_to_show.append(bar_data)
-        return list_to_show
+            bar_items.append(bar_data)
+        return bar_items
 
 
 class RecipesTable(ft.Column):

@@ -1,6 +1,7 @@
 import flet as ft
 
 from pages.add_edit_ingredient import AddEditIngredientsPage
+from pages.add_edit_recipe import AddEditRecipePage
 from src.pages.ingredients import IngredientsPage
 from src.pages.home import HelloPage
 from src.pages.input_text import InputPage
@@ -19,7 +20,8 @@ class BaseLayout(ft.Column):
                 ft.NavigationRailDestination(icon=ft.Icons.HOME, label="Hello"),
                 ft.NavigationRailDestination(icon=ft.Icons.EDIT, label="Input"),
                 ft.NavigationRailDestination(icon=ft.Icons.LIST_ALT, label="Ingredients"),
-                ft.NavigationRailDestination(icon=ft.Icons.EDIT, label="Add/Edit"),
+                ft.NavigationRailDestination(icon=ft.Icons.EDIT, label="Add/Edit Ingredients"),
+                ft.NavigationRailDestination(icon=ft.Icons.EDIT, label="Add/Edit Recipes"),
             ],
             on_change=self.on_nav_change,
         )
@@ -57,6 +59,8 @@ class BaseLayout(ft.Column):
             return IngredientsPage()
         elif index == 3:
             return AddEditIngredientsPage(mode="add")  
+        elif index == 4:
+            return AddEditRecipePage(mode="add")
         else:
             return ft.Text("Page not found")
 
