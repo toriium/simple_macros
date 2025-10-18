@@ -1,5 +1,15 @@
 import flet as ft
 from abc import abstractmethod, ABC
+from dataclasses import dataclass
+
+
+@dataclass
+class SearchBarData:
+    title: str
+    subtitle: str
+    data: any
+    img_path: str | None = None
+
 
 class CustomSearchBar(ft.SearchBar, ABC):
     def __init__(self):
@@ -15,18 +25,23 @@ class CustomSearchBar(ft.SearchBar, ABC):
 
         self.lv = ft.ListView()
         self.controls = [self.lv]
-    
+
     @abstractmethod
-    def items_to_show(self, typed_text:str) -> list[str]:
-        ...
+    def search_bar_items(self, typed_text: str) -> list[SearchBarData]: ...
 
     def handle_change(self, e: ft.ControlEvent):
-        items_to_show = self.items_to_show(e.data.lower())
-      
+        search_bar_items = self.search_bar_items(e.data.lower())
+
         self.lv.controls.clear()
-        for title, data in items_to_show:
+        for data in search_bar_items:
+            leading = ft.Image(src=data.img_path, fit="contain") if data.img_path else ft.Icon(ft.Icons.SETTINGS)
+
             list_tile = ft.ListTile(
-                title=ft.Text(f"{title}"), on_click=self.close_anchor, data=data
+                on_click=self.close_anchor,
+                data=data,
+                leading=leading,
+                title=ft.Text(data.title),
+                subtitle=ft.Text(data.subtitle),
             )
             self.lv.controls.append(list_tile)
         self.update()

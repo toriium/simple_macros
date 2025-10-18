@@ -2,7 +2,7 @@ import flet as ft
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
-from src.components.search_bar import CustomSearchBar
+from src.components.search_bar import CustomSearchBar, SearchBarData
 
 fruits_list = [
     "apple",
@@ -25,11 +25,18 @@ class Fruit:
 
 
 class FruitsSearchBar(CustomSearchBar):
-    def items_to_show(self, typed_text: str) -> list[str, Fruit]:
-        list_to_show = []
+    def search_bar_items(self, typed_text: str) -> list[SearchBarData]:
+        list_to_show: SearchBarData = []
+
         for i, fruit in enumerate(fruits_list):
-            f = Fruit(id=i, name=fruit)
-            list_to_show.append((f"[{i}] {fruit}", f))
+            data = Fruit(id=i, name=fruit)
+            bar_data = SearchBarData(
+                title=fruit,
+                subtitle="subtitle: " + fruit,
+                data=data,
+                img_path=None,
+            )
+            list_to_show.append(bar_data)
         return list_to_show
 
 
@@ -45,7 +52,7 @@ class RecipesTable(ft.Column):
 
     def bar_change(self, e):
         selected_data = self.search_bar.selected_data
-        self.display_text.value = f"Selected: {selected_data.name}"
+        self.display_text.value = f"Selected: {selected_data.title}"
         self.update()
 
 def main(page):
